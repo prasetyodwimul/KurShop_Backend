@@ -24,32 +24,6 @@ https://github.com/prasetyodwimul/KurShop_Backend
 
 ---
 
-## 📱 Tampilan Aplikasi
-
-> Tambahkan screenshot aplikasi pada bagian ini.
-
-### Halaman Login
-
-![Login](docs/login.png)
-
-### Dashboard User
-
-![Dashboard User](docs/dashboard-user.png)
-
-### Keranjang Belanja
-
-![Cart](docs/cart.png)
-
-### Invoice Transaksi
-
-![Invoice](docs/invoice.png)
-
-### Dashboard Admin
-
-![Dashboard Admin](docs/dashboard-admin.png)
-
----
-
 ## 🚀 Fitur Aplikasi
 
 ### 👤 Fitur User
