@@ -1,4 +1,8 @@
-from fastapi import FastAPI, Depends, HTTPException
+import os
+import shutil
+
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 
 import models
@@ -7,7 +11,10 @@ import crud
 
 from database import engine, get_db
 
-
+from fastapi import UploadFile, File
+from fastapi.staticfiles import StaticFiles
+import shutil
+import os
 # =========================================================
 # CREATE TABLE
 # =========================================================
@@ -24,7 +31,18 @@ app = FastAPI(
     version="1.0.0"
 )
 
+UPLOAD_DIR = "uploads"
 
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+UPLOAD_DIR = "uploads"
+
+if not os.path.exists(UPLOAD_DIR):
+    os.makedirs(UPLOAD_DIR)
+
+app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 # =========================================================
 # AUTH
 # =========================================================
@@ -287,6 +305,42 @@ def create_produk(
         produk
     )
 
+@app.post("/produk/upload", tags=["Produk"])
+def create_produk_upload(
+    nama: str = Form(...),
+    deskripsi: str = Form(...),
+    harga: int = Form(...),
+    stok: int = Form(...),
+    id_kategori: int = Form(...),
+    foto: UploadFile = File(...),
+    db: Session = Depends(get_db)
+):
+    file_location = f"{UPLOAD_DIR}/{foto.filename}"
+
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(foto.file, buffer)
+
+    foto_url = f"/uploads/{foto.filename}"
+
+    produk = schemas.ProdukCreate(
+        nama=nama,
+        deskripsi=deskripsi,
+        harga=harga,
+        stok=stok,
+        id_kategori=id_kategori,
+        foto=foto_url
+    )
+@app.post("/upload-foto", tags=["Upload"])
+def upload_foto(file: UploadFile = File(...)):
+    file_location = f"{UPLOAD_DIR}/{file.filename}"
+
+    with open(file_location, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {
+        "filename": file_location
+    }
+    return crud.create_produk(db, produk)
 
 @app.put("/produk/{produk_id}",
          response_model=schemas.Produk,
@@ -333,22 +387,76 @@ def delete_produk(
     }
 
 
+
 # =========================================================
 # CART
 # =========================================================
 
-@app.get("/cart",
-         response_model=list[schemas.Cart],
-         tags=["Cart"])
+@app.get(
+    "/cart",
+    response_model=list[schemas.Cart],
+    tags=["Cart"]
+)
 def read_cart(
     db: Session = Depends(get_db)
 ):
     return crud.get_carts(db)
 
 
-@app.get("/cart/{cart_id}",
-         response_model=schemas.Cart,
-         tags=["Cart"])
+@app.get(
+    "/cart/user/{id_user}",
+    tags=["Cart"]
+)
+def get_cart_by_user(
+    id_user: int,
+    db: Session = Depends(get_db)
+):
+    cart = db.query(models.Cart).filter(
+        models.Cart.id_user == id_user
+    ).first()
+
+    if not cart:
+        return []
+
+    data = db.query(
+        models.DetailCart.id.label("id"),
+        models.DetailCart.id_cart.label("id_cart"),
+        models.DetailCart.id_produk.label("id_produk"),
+        models.Produk.nama.label("nama_produk"),
+        models.Produk.harga.label("harga"),
+        models.DetailCart.jumlah.label("jumlah")
+    ).join(
+        models.Produk,
+        models.DetailCart.id_produk == models.Produk.id
+    ).filter(
+        models.DetailCart.id_cart == cart.id
+    ).all()
+
+    result = []
+
+    for item in data:
+        harga = int(item.harga)
+        jumlah = int(item.jumlah)
+        subtotal = harga * jumlah
+
+        result.append({
+            "id": item.id,
+            "id_cart": item.id_cart,
+            "id_produk": item.id_produk,
+            "nama_produk": item.nama_produk,
+            "harga": harga,
+            "jumlah": jumlah,
+            "subtotal": subtotal
+        })
+
+    return result
+
+
+@app.get(
+    "/cart/{cart_id}",
+    response_model=schemas.Cart,
+    tags=["Cart"]
+)
 def read_cart_by_id(
     cart_id: int,
     db: Session = Depends(get_db)
@@ -367,21 +475,32 @@ def read_cart_by_id(
     return cart
 
 
-@app.post("/cart",
-          response_model=schemas.Cart,
-          tags=["Cart"])
+@app.post(
+    "/cart",
+    response_model=schemas.Cart,
+    tags=["Cart"]
+)
 def create_cart(
     cart: schemas.CartCreate,
     db: Session = Depends(get_db)
 ):
+    existing_cart = db.query(models.Cart).filter(
+        models.Cart.id_user == cart.id_user
+    ).first()
+
+    if existing_cart:
+        return existing_cart
+
     return crud.create_cart(
         db,
         cart
     )
 
 
-@app.delete("/cart/{cart_id}",
-            tags=["Cart"])
+@app.delete(
+    "/cart/{cart_id}",
+    tags=["Cart"]
+)
 def delete_cart(
     cart_id: int,
     db: Session = Depends(get_db)
@@ -400,24 +519,26 @@ def delete_cart(
     return {
         "message": "Cart berhasil dihapus"
     }
-
-
 # =========================================================
 # DETAIL CART
 # =========================================================
 
-@app.get("/detail-cart",
-         response_model=list[schemas.DetailCart],
-         tags=["Detail Cart"])
+@app.get(
+    "/detail-cart",
+    response_model=list[schemas.DetailCart],
+    tags=["Detail Cart"]
+)
 def read_detail_cart(
     db: Session = Depends(get_db)
 ):
     return crud.get_detail_cart(db)
 
 
-@app.get("/detail-cart/{detail_id}",
-         response_model=schemas.DetailCart,
-         tags=["Detail Cart"])
+@app.get(
+    "/detail-cart/{detail_id}",
+    response_model=schemas.DetailCart,
+    tags=["Detail Cart"]
+)
 def read_detail_cart_by_id(
     detail_id: int,
     db: Session = Depends(get_db)
@@ -436,22 +557,43 @@ def read_detail_cart_by_id(
     return detail
 
 
-@app.post("/detail-cart",
-          response_model=schemas.DetailCart,
-          tags=["Detail Cart"])
+@app.post(
+    "/detail-cart",
+    response_model=schemas.DetailCart,
+    tags=["Detail Cart"]
+)
 def create_detail_cart(
     detail: schemas.DetailCartCreate,
     db: Session = Depends(get_db)
 ):
+    existing_detail = db.query(models.DetailCart).filter(
+        models.DetailCart.id_cart == detail.id_cart,
+        models.DetailCart.id_produk == detail.id_produk
+    ).first()
+
+    if existing_detail:
+        existing_detail.jumlah += detail.jumlah
+
+        # karena dari Android kamu mengirim harga satuan produk
+        # maka harga tetap harga satuan, tidak perlu ditambah
+        existing_detail.harga = detail.harga
+
+        db.commit()
+        db.refresh(existing_detail)
+
+        return existing_detail
+
     return crud.create_detail_cart(
         db,
         detail
     )
 
 
-@app.put("/detail-cart/{detail_id}",
-         response_model=schemas.DetailCart,
-         tags=["Detail Cart"])
+@app.put(
+    "/detail-cart/{detail_id}",
+    response_model=schemas.DetailCart,
+    tags=["Detail Cart"]
+)
 def update_detail_cart(
     detail_id: int,
     detail: schemas.DetailCartCreate,
@@ -472,8 +614,10 @@ def update_detail_cart(
     return db_detail
 
 
-@app.delete("/detail-cart/{detail_id}",
-            tags=["Detail Cart"])
+@app.delete(
+    "/detail-cart/{detail_id}",
+    tags=["Detail Cart"]
+)
 def delete_detail_cart(
     detail_id: int,
     db: Session = Depends(get_db)
@@ -492,7 +636,6 @@ def delete_detail_cart(
     return {
         "message": "Detail cart berhasil dihapus"
     }
-
 
 # =========================================================
 # TRANSAKSI
