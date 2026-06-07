@@ -1,6 +1,3 @@
-Iya, kepisah karena di dalam README ada kode blok lagi pakai ```sehingga tampilannya pecah. Ini versi **satu canvas kode utuh**, aman buat langsung copy paste ke`README.md`.
-
-````md
 # 🛒 KurShop Android App
 
 KurShop adalah aplikasi mobile sederhana berbasis Android untuk proses belanja online. Aplikasi ini dibuat menggunakan **Android Studio** dengan bahasa **Kotlin** dan terhubung ke backend melalui **REST API** menggunakan **Retrofit**.
@@ -9,7 +6,15 @@ Aplikasi ini memiliki dua jenis pengguna, yaitu **User** dan **Admin**. User dap
 
 ---
 
-## 🔗 Repository Backend
+## 🔗 Repository Project
+
+### Android App
+
+```bash
+https://github.com/prasetyodwimul/KurShopAndroid
+```
+
+### Backend API
 
 Backend KurShop dibuat menggunakan Python dan tersedia pada repository berikut:
 
@@ -151,10 +156,8 @@ Pastikan alamat IP backend sudah sesuai dengan server yang sedang dijalankan.
 ### 1. Clone Repository Android
 
 ```bash
-git clone https://github.com/username/KurShop_Android.git
+git clone https://github.com/prasetyodwimul/KurShopAndroid
 ```
-
-> Ganti `username/KurShop_Android` dengan repository Android kamu.
 
 ---
 
@@ -163,7 +166,7 @@ git clone https://github.com/username/KurShop_Android.git
 Buka Android Studio, lalu pilih:
 
 ```text
-Open Project > Pilih folder KurShop Android
+Open Project > Pilih folder KurShopAndroid
 ```
 
 ---
@@ -256,21 +259,22 @@ Aplikasi KurShop mengelola beberapa data utama, yaitu:
 
 Beberapa fitur yang dapat diuji:
 
-| No  | Fitur                   | Status   |
-| --- | ----------------------- | -------- |
-| 1   | Login User              | Berjalan |
-| 2   | Register User           | Berjalan |
-| 3   | Menampilkan Produk      | Berjalan |
-| 4   | Search Produk           | Berjalan |
-| 5   | Filter Kategori         | Berjalan |
-| 6   | Tambah ke Keranjang     | Berjalan |
-| 7   | Checkout                | Berjalan |
-| 8   | Invoice                 | Berjalan |
-| 9   | Riwayat Transaksi       | Berjalan |
-| 10  | Dashboard Admin         | Berjalan |
-| 11  | CRUD Produk             | Berjalan |
-| 12  | Filter Transaksi        | Berjalan |
-| 13  | Update Status Transaksi | Berjalan |
+| No  | Fitur                    | Status   |
+| --- | ------------------------ | -------- |
+| 1   | Login User               | Berjalan |
+| 2   | Register User            | Berjalan |
+| 3   | Menampilkan Produk       | Berjalan |
+| 4   | Search Produk            | Berjalan |
+| 5   | Filter Kategori          | Berjalan |
+| 6   | Tambah ke Keranjang      | Berjalan |
+| 7   | Checkout                 | Berjalan |
+| 8   | Invoice                  | Berjalan |
+| 9   | Riwayat Transaksi        | Berjalan |
+| 10  | Dashboard Admin          | Berjalan |
+| 11  | CRUD Produk              | Berjalan |
+| 12  | Filter Transaksi         | Berjalan |
+| 13  | Update Status Transaksi  | Berjalan |
+| 14  | Laporan Pendapatan Admin | Berjalan |
 
 ---
 
@@ -301,14 +305,17 @@ Beberapa fitur yang dapat dikembangkan ke depannya:
 
 ## 👨‍💻 Pengembang
 
-**Nama:** Bilal Rizky | M. Farrel Krisnanegara | M. Pasya Pramudya | M. Rendy Breventa | Mutia Saladina | Prasetyo Dwi Mulyono  
-**Project:** KurShop Android App  
-**Backend:** KurShop Backend  
-**Repository Backend:** https://github.com/prasetyodwimul/KurShop_Backend
+Project ini dikembangkan oleh:
+
+- Bilal Rizky
+- M. Farrel Krisnanegara
+- M. Pasya Pramudya
+- M. Rendy Breventa
+- Mutia Saladina
+- Prasetyo Dwi Mulyono
 
 ---
 
 ## 📄 Lisensi
 
 Project ini dibuat untuk kebutuhan pembelajaran dan praktikum pengembangan aplikasi mobile.
-````
